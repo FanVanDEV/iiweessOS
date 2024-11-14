@@ -80,14 +80,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\CalCommand.cs" />
+    <Compile Include="Commands\CdCommand.cs" />
+    <Compile Include="Commands\DateCommand.cs" />
+    <Compile Include="Commands\ExitCommand.cs" />
+    <Compile Include="Commands\ICommand.cs" />
+    <Compile Include="Commands\LsCommand.cs" />
+    <Compile Include="Commands\RmCommand.cs" />
+    <Compile Include="Controllers\ShellController.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Models\FileSystemModel.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\CommandFactory.cs" />
+    <Compile Include="Utils\ConfigParser.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -116,9 +127,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Config\" />
-    <Folder Include="Controllers\" />
-    <Folder Include="Models\" />
-    <Folder Include="Utils\" />
     <Folder Include="Views\" />
   </ItemGroup>
   <ItemGroup>
