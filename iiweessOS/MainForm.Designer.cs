@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.terminalTextBox = new System.Windows.Forms.RichTextBox();
             this.headPanel = new System.Windows.Forms.Panel();
             this.closeButton = new System.Windows.Forms.Button();
             this.collapseButton = new System.Windows.Forms.Button();
@@ -37,21 +37,24 @@
             this.headPanel.SuspendLayout();
             this.SuspendLayout();
             // 
-            // richTextBox1
+            // terminalTextBox
             // 
-            this.richTextBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(23)))), ((int)(((byte)(41)))));
-            this.richTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.richTextBox1.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBox1.Font = new System.Drawing.Font("Consolas", 14F);
-            this.richTextBox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(170)))), ((int)(((byte)(100)))));
-            this.richTextBox1.Location = new System.Drawing.Point(0, 0);
-            this.richTextBox1.Margin = new System.Windows.Forms.Padding(0);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(800, 450);
-            this.richTextBox1.TabIndex = 0;
-            this.richTextBox1.Text = "asdasdsdasadasdsdadsasdasdasdasda";
-            this.richTextBox1.TextChanged += new System.EventHandler(this.richTextBox1_TextChanged);
+            this.terminalTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.terminalTextBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(23)))), ((int)(((byte)(41)))));
+            this.terminalTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.terminalTextBox.Cursor = System.Windows.Forms.Cursors.Arrow;
+            this.terminalTextBox.Font = new System.Drawing.Font("Consolas", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.terminalTextBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(170)))), ((int)(((byte)(100)))));
+            this.terminalTextBox.Location = new System.Drawing.Point(0, 47);
+            this.terminalTextBox.Margin = new System.Windows.Forms.Padding(0);
+            this.terminalTextBox.Name = "terminalTextBox";
+            this.terminalTextBox.ReadOnly = true;
+            this.terminalTextBox.Size = new System.Drawing.Size(800, 409);
+            this.terminalTextBox.TabIndex = 0;
+            this.terminalTextBox.Text = "";
+            this.terminalTextBox.TextChanged += new System.EventHandler(this.richTextBox1_TextChanged);
             // 
             // headPanel
             // 
@@ -125,7 +128,7 @@
             this.BackColor = System.Drawing.SystemColors.ControlText;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.headPanel);
-            this.Controls.Add(this.richTextBox1);
+            this.Controls.Add(this.terminalTextBox);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";
             this.Text = "iiweessOS — Shell emulator for operating system";
@@ -138,7 +141,7 @@
 
         #endregion
 
-        private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.RichTextBox terminalTextBox;
         private System.Windows.Forms.Panel headPanel;
         private System.Windows.Forms.Button closeButton;
         private System.Windows.Forms.Button collapseButton;

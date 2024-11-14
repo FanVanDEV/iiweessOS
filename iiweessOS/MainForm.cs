@@ -1,12 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace iiweessOS
@@ -22,6 +15,9 @@ namespace iiweessOS
         private const int WM_NCLBUTTONDOWN = 0xA1;
         private const int HTCAPTION = 0x2;
 
+        private readonly string _prompt;
+        private string _currentInput = "";
+
         public MainForm()
         {
             StyleForm();
@@ -30,6 +26,11 @@ namespace iiweessOS
 
             this.Resize += MainForm_Resize;
             this.SizeChanged += MainForm_SizeChanged;
+            terminalTextBox.KeyPress += terminalTextBox_KeyPress;
+
+            _prompt = "FanVan@emulator:~$ ";
+
+            DisplayPrompt();
         }
         private void MainForm_Resize(object sender, EventArgs e)
         {
@@ -114,6 +115,56 @@ namespace iiweessOS
         private void MainForm_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void DisplayPrompt()
+        {
+            AppendText(_prompt);
+        }
+
+        private void AppendText(string text)
+        {
+            terminalTextBox.AppendText(text);
+            terminalTextBox.SelectionStart = terminalTextBox.Text.Length;
+            terminalTextBox.ScrollToCaret();
+        }
+
+        private void terminalTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar))
+            {
+                _currentInput += e.KeyChar;
+                AppendText(e.KeyChar.ToString());
+                e.Handled = true;
+            }
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Enter)
+            {
+                ExecuteCurrentInput();
+                return true;
+            }
+
+            if (keyData == Keys.Back && _currentInput.Length > 0)
+            {
+                _currentInput = _currentInput.Substring(0, _currentInput.Length - 1);
+                terminalTextBox.Text = terminalTextBox.Text.Substring(0, _prompt.Length + _currentInput.Length);
+
+                terminalTextBox.SelectionStart = terminalTextBox.Text.Length;
+                terminalTextBox.ScrollToCaret();
+
+                return true;
+            }
+
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+        
+        private void ExecuteCurrentInput()
+        {
+            throw new NotImplementedException();
         }
     }
 }
