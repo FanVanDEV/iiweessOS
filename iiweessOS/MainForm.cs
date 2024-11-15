@@ -1,4 +1,7 @@
-﻿using System;
+﻿using iiweessOS.Models;
+using iiweessOS.Utils;
+using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -20,6 +23,20 @@ namespace iiweessOS
 
         public MainForm()
         {
+            Config config = null;
+            FileSystemModel fs = new FileSystemModel();
+
+            try
+            {
+                config = ConfigParser.LoadConfig(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config", "config.yml"));
+                fs.LoadFromTar(config.Filesystem);
+            } catch (FileNotFoundException e)
+            {
+                MessageBox.Show(e.Message, "Error while finding file", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+                return;
+            }
+
             StyleForm();
             InitializeComponent();
             InitPanel();
@@ -28,7 +45,7 @@ namespace iiweessOS
             this.SizeChanged += MainForm_SizeChanged;
             terminalTextBox.KeyPress += terminalTextBox_KeyPress;
 
-            _prompt = "FanVan@emulator:~$ ";
+            _prompt = $"{config.User}@emulator:~$ ";
 
             DisplayPrompt();
         }
@@ -150,7 +167,7 @@ namespace iiweessOS
             if (keyData == Keys.Back && _currentInput.Length > 0)
             {
                 _currentInput = _currentInput.Substring(0, _currentInput.Length - 1);
-                terminalTextBox.Text = terminalTextBox.Text.Substring(0, _prompt.Length + _currentInput.Length);
+                terminalTextBox.Text = terminalTextBox.Text.Substring(0, terminalTextBox.Text.Length - 1);
 
                 terminalTextBox.SelectionStart = terminalTextBox.Text.Length;
                 terminalTextBox.ScrollToCaret();
@@ -164,7 +181,18 @@ namespace iiweessOS
         
         private void ExecuteCurrentInput()
         {
-            throw new NotImplementedException();
+            AppendText("\n");
+            var result = _currentInput;
+            if (result == "exit")
+            {
+                Application.Exit();
+                return;
+            }
+            if (result != "") 
+                AppendText(result + "\n");  
+            _currentInput = "";
+            DisplayPrompt();
         }
+    
     }
 }

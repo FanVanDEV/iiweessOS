@@ -51,6 +51,7 @@
             this.terminalTextBox.Margin = new System.Windows.Forms.Padding(0);
             this.terminalTextBox.Name = "terminalTextBox";
             this.terminalTextBox.ReadOnly = true;
+            this.terminalTextBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
             this.terminalTextBox.Size = new System.Drawing.Size(800, 409);
             this.terminalTextBox.TabIndex = 0;
             this.terminalTextBox.Text = "";
@@ -140,12 +141,11 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.RichTextBox terminalTextBox;
         private System.Windows.Forms.Panel headPanel;
         private System.Windows.Forms.Button closeButton;
         private System.Windows.Forms.Button collapseButton;
         private System.Windows.Forms.Button resizeButton;
+        private System.Windows.Forms.RichTextBox terminalTextBox;
     }
 }
 
