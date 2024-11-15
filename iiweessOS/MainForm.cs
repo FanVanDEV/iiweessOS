@@ -21,16 +21,18 @@ namespace iiweessOS
         private readonly string _prompt;
         private string _currentInput = "";
 
-        public MainForm()
-        {
-            Config config = null;
-            FileSystemModel fs = new FileSystemModel();
+        private FileSystemModel fs = new FileSystemModel();
+        private Config config = null;
 
+        public MainForm()
+        {       
             try
             {
                 config = ConfigParser.LoadConfig(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config", "config.yml"));
                 fs.LoadFromTar(config.Filesystem);
-            } catch (FileNotFoundException e)
+                fs.ChangeDirectory("root");
+            }
+            catch (FileNotFoundException e)
             {
                 MessageBox.Show(e.Message, "Error while finding file", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
@@ -45,7 +47,7 @@ namespace iiweessOS
             this.SizeChanged += MainForm_SizeChanged;
             terminalTextBox.KeyPress += terminalTextBox_KeyPress;
 
-            _prompt = $"{config.User}@emulator:~$ ";
+            _prompt = $"{config.User}@emulator:{(fs.GetCurrentDirectory() == "root/" ? "~" : fs.GetCurrentDirectory())}$ ";
 
             DisplayPrompt();
         }
@@ -146,6 +148,13 @@ namespace iiweessOS
             terminalTextBox.ScrollToCaret();
         }
 
+        private void SetText(string text)
+        {
+            terminalTextBox.Text = text;
+            terminalTextBox.SelectionStart = terminalTextBox.Text.Length;
+            terminalTextBox.ScrollToCaret();
+        }
+
         private void terminalTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!char.IsControl(e.KeyChar))
@@ -178,21 +187,28 @@ namespace iiweessOS
 
             return base.ProcessCmdKey(ref msg, keyData);
         }
-        
+
         private void ExecuteCurrentInput()
         {
             AppendText("\n");
             var result = _currentInput;
-            if (result == "exit")
+            switch (result)
             {
-                Application.Exit();
-                return;
+                case "exit":
+                    Application.Exit();
+                    return;
+                case "clear":
+                    SetText("");
+                    break;
+                default:
+                    if (result.Length > 0)
+                        AppendText(result + "\n");
+                    break;
             }
-            if (result != "") 
-                AppendText(result + "\n");  
+              
             _currentInput = "";
             DisplayPrompt();
         }
-    
+
     }
 }

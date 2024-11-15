@@ -6,7 +6,16 @@ using System.Threading.Tasks;
 
 namespace iiweessOS.Commands
 {
-    public class DateCommand
+    public class DateCommand : ICommand
     {
+        public string Execute(string[] args)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetHelp()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

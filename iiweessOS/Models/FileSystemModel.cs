@@ -12,7 +12,7 @@ namespace iiweessOS.Models
     public class FileSystemModel
     {
         private readonly Dictionary<string, List<string>> _fileSystem = new Dictionary<string, List<string>>();
-        private string _currentDirectory = "/";
+        private string _currentDirectory = "";
 
         public void LoadFromTar(string tarPath)
         {
