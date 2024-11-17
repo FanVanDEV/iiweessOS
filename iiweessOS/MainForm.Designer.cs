@@ -95,7 +95,7 @@
             this.collapseButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.collapseButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 22.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.collapseButton.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(145)))), ((int)(((byte)(165)))));
-            this.collapseButton.Location = new System.Drawing.Point(653, 0);
+            this.collapseButton.Location = new System.Drawing.Point(656, 0);
             this.collapseButton.Name = "collapseButton";
             this.collapseButton.Size = new System.Drawing.Size(32, 45);
             this.collapseButton.TabIndex = 1;
@@ -112,7 +112,7 @@
             this.resizeButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.resizeButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 16.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.resizeButton.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(145)))), ((int)(((byte)(165)))));
-            this.resizeButton.Location = new System.Drawing.Point(705, 0);
+            this.resizeButton.Location = new System.Drawing.Point(707, 0);
             this.resizeButton.Name = "resizeButton";
             this.resizeButton.Size = new System.Drawing.Size(32, 44);
             this.resizeButton.TabIndex = 0;

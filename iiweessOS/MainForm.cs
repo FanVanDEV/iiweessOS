@@ -1,4 +1,5 @@
-﻿using iiweessOS.Models;
+﻿using iiweessOS.Controllers;
+using iiweessOS.Models;
 using iiweessOS.Utils;
 using System;
 using System.IO;
@@ -21,16 +22,19 @@ namespace iiweessOS
         private readonly string _prompt;
         private string _currentInput = "";
 
-        private FileSystemModel fs = new FileSystemModel();
-        private Config config = null;
+        private readonly FileSystemModel _fs = new FileSystemModel();
+        private readonly Config _config = null;
+        private readonly ShellController _shellController = null;
 
         public MainForm()
         {       
             try
             {
-                config = ConfigParser.LoadConfig(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config", "config.yml"));
-                fs.LoadFromTar(config.Filesystem);
-                fs.ChangeDirectory("root");
+                _config = ConfigParser.LoadConfig(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config", "config.yml"));
+                _fs.LoadFromTar(_config.Filesystem);
+                _fs.ChangeDirectory("root");
+
+                _shellController = new ShellController(new CommandFactory(_fs));
             }
             catch (FileNotFoundException e)
             {
@@ -47,7 +51,7 @@ namespace iiweessOS
             this.SizeChanged += MainForm_SizeChanged;
             terminalTextBox.KeyPress += terminalTextBox_KeyPress;
 
-            _prompt = $"{config.User}@emulator:{(fs.GetCurrentDirectory() == "root/" ? "~" : fs.GetCurrentDirectory())}$ ";
+            _prompt = $"{_config.User}@emulator:{(_fs.GetCurrentDirectory() == "root/" ? "~" : _fs.GetCurrentDirectory())}$ ";
 
             DisplayPrompt();
         }
@@ -141,6 +145,16 @@ namespace iiweessOS
             AppendText(_prompt);
         }
 
+        private void InsertText(string text, int position)
+        {
+            _currentInput = _currentInput.Insert(position - (terminalTextBox.Text.Length - _currentInput.Length), text);
+
+            terminalTextBox.Text = terminalTextBox.Text.Insert(position, text);
+
+            terminalTextBox.SelectionStart = position + 1;
+            terminalTextBox.SelectionLength = 0;
+        }
+
         private void AppendText(string text)
         {
             terminalTextBox.AppendText(text);
@@ -155,12 +169,29 @@ namespace iiweessOS
             terminalTextBox.ScrollToCaret();
         }
 
+        private void RemoveSymbol(int cursorPosition)
+        {
+            _currentInput = _currentInput.Remove(cursorPosition - (terminalTextBox.Text.Length - _currentInput.Length) - 1, 1);
+            terminalTextBox.Text = terminalTextBox.Text.Remove(cursorPosition - 1, 1);
+
+            terminalTextBox.SelectionStart = cursorPosition - 1;
+            terminalTextBox.ScrollToCaret();
+        }
+
         private void terminalTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!char.IsControl(e.KeyChar))
             {
-                _currentInput += e.KeyChar;
-                AppendText(e.KeyChar.ToString());
+                int cursorPosition = terminalTextBox.SelectionStart;
+
+                if (cursorPosition < terminalTextBox.Text.Length - _currentInput.Length)
+                {
+                    e.Handled = true;
+                    return;
+                }
+
+                InsertText(e.KeyChar.ToString(), cursorPosition);
+
                 e.Handled = true;
             }
         }
@@ -173,15 +204,39 @@ namespace iiweessOS
                 return true;
             }
 
-            if (keyData == Keys.Back && _currentInput.Length > 0)
+            if (keyData == Keys.Left)
             {
-                _currentInput = _currentInput.Substring(0, _currentInput.Length - 1);
-                terminalTextBox.Text = terminalTextBox.Text.Substring(0, terminalTextBox.Text.Length - 1);
+                int cursorPosition = terminalTextBox.SelectionStart;
+                
+                if (cursorPosition <= terminalTextBox.Text.Length - _currentInput.Length)
+                {
+                    terminalTextBox.SelectionStart = cursorPosition + 1;
+                    terminalTextBox.ScrollToCaret();
+                    return false;
+                }
+            }
 
-                terminalTextBox.SelectionStart = terminalTextBox.Text.Length;
-                terminalTextBox.ScrollToCaret();
+            if (_currentInput.Length > 0)
+            {
+                if (keyData == Keys.Back)
+                {
+                    int cursorPosition = terminalTextBox.SelectionStart;
 
-                return true;
+                    RemoveSymbol(cursorPosition);
+
+                    return true;
+                }
+
+                if (keyData == Keys.Delete)
+                {
+                    int cursorPosition = terminalTextBox.SelectionStart;
+
+                    if (cursorPosition - (terminalTextBox.Text.Length - _currentInput.Length) + 1 > _currentInput.Length) return false;
+
+                    RemoveSymbol(cursorPosition + 1);
+
+                    return true;
+                }
             }
 
 
@@ -191,7 +246,8 @@ namespace iiweessOS
         private void ExecuteCurrentInput()
         {
             AppendText("\n");
-            var result = _currentInput;
+
+            string result = _shellController.ExecuteCommand(_currentInput);
             switch (result)
             {
                 case "exit":
