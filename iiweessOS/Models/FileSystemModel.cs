@@ -106,34 +106,39 @@ namespace iiweessOS.Models
         public void Remove(string target, bool recursive = false, bool force = false)
         {
             target = NormalizePath(target);
+            string directory = target;
+            string fileName = null;
 
-            if (!_fileSystem.ContainsKey(target))
+            if (!_fileSystem.ContainsKey(target)) {
+                directory = target.Substring(0, target.Substring(0, target.Length - 1).LastIndexOf('/')) + "/";
+                fileName = target.Substring(target.Substring(0, target.Length - 1).LastIndexOf('/') + 1);
+                fileName = fileName.Remove(fileName.Length - 1);
+            }
+
+            if (_fileSystem.ContainsKey(directory) && _fileSystem[directory].Contains(fileName))
+            {
+                _fileSystem[directory].Remove(fileName);
+                return;
+            }
+
+            if (!_fileSystem.ContainsKey(directory))
             {
                 if (force)
                 {
                     return;
                 }
 
-                throw new FileNotFoundException($"Target not found: {target}");
+                throw new FileNotFoundException($"Directory not found: {directory}");
             }
 
-            if (_fileSystem[target].Count == 0)
+            if (!recursive && _fileSystem[directory].Count > 0)
             {
-                _fileSystem.Remove(target);
+                throw new InvalidOperationException("Directory is not empty. Use recursive flag to delete.");
             }
-            else
+
+            if (recursive)
             {
-                if (!recursive && _fileSystem[target].Count > 0)
-                {
-                    throw new InvalidOperationException("Directory is not empty. Use recursive flag to delete.");
-                }
-
-                if (recursive)
-                {
-                    DeleteDirectoryRecursive(target);
-                }
-
-                _fileSystem.Remove(target);
+                DeleteDirectoryRecursive(directory);
             }
         }
 
@@ -161,6 +166,7 @@ namespace iiweessOS.Models
 
             _fileSystem.Remove(directory);
         }
+
 
         private string NormalizePath(string path)
         {
