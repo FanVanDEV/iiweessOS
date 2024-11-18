@@ -2,6 +2,7 @@
 using iiweessOS.Models;
 using iiweessOS.Utils;
 using System;
+using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -19,10 +20,10 @@ namespace iiweessOS
         private const int WM_NCLBUTTONDOWN = 0xA1;
         private const int HTCAPTION = 0x2;
 
-        private readonly string _prompt;
+        private string _prompt;
         private string _currentInput = "";
 
-        private readonly FileSystemModel _fs = new FileSystemModel();
+        private readonly FileSystemModel _fs = null;
         private readonly Config _config = null;
         private readonly ShellController _shellController = null;
 
@@ -31,8 +32,10 @@ namespace iiweessOS
             try
             {
                 _config = ConfigParser.LoadConfig(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config", "config.yml"));
+
+                _fs = new FileSystemModel(_config.User == "root" ? "root" : $"home/{_config.User}");
                 _fs.LoadFromTar(_config.Filesystem);
-                _fs.ChangeDirectory("root");
+                _fs.ChangeDirectory("~");
 
                 _shellController = new ShellController(new CommandFactory(_fs));
             }
@@ -51,10 +54,35 @@ namespace iiweessOS
             this.SizeChanged += MainForm_SizeChanged;
             terminalTextBox.KeyPress += terminalTextBox_KeyPress;
 
-            _prompt = $"{_config.User}@emulator:{(_fs.GetCurrentDirectory() == "root/" ? "~" : _fs.GetCurrentDirectory())}$ ";
-
+            UpdatePrompt();
             DisplayPrompt();
         }
+
+        private void UpdatePrompt()
+        {
+            string currentDirectory = "/" + _fs.GetCurrentDirectory();
+            string path = currentDirectory; 
+
+            if (_config.User == "root" && currentDirectory.StartsWith("root")
+                )
+            {
+                path = "~" + currentDirectory
+                    .Substring(4);
+            } else if (_config.User != "root" && currentDirectory.StartsWith("/home/" + _config.User))
+            {
+                int dirLength = $"/home/{_config.User}".Length;
+
+                path = "~" + currentDirectory
+                    .Substring(dirLength);
+            }
+
+            path = path.Substring(0, path.Length - 1);
+
+            string symbol = _config.User == "root" ? "#" : "$";
+
+            _prompt = $"{_config.User}@emulator:{path}{symbol} ";
+        }
+
         private void MainForm_Resize(object sender, EventArgs e)
         {
             UpdateMaximizeButton();
@@ -263,6 +291,7 @@ namespace iiweessOS
             }
               
             _currentInput = "";
+            UpdatePrompt();
             DisplayPrompt();
         }
 

@@ -12,7 +12,12 @@ namespace iiweessOS.Models
     public class FileSystemModel
     {
         private readonly Dictionary<string, List<string>> _fileSystem = new Dictionary<string, List<string>>();
+        private readonly string _homeDirectory;
         private string _currentDirectory = "";
+
+        public FileSystemModel(string homeDirectory) {
+            _homeDirectory = NormalizePath(homeDirectory);
+        }
 
         public void LoadFromTar(string tarPath)
         {
@@ -51,12 +56,41 @@ namespace iiweessOS.Models
         public List<string> ListDirectory(string path)
         {
             path = NormalizePath(path);
-            return _fileSystem.ContainsKey(path) ? _fileSystem[path] : new List<string> { "Directory not found" };
+
+            if (!_fileSystem.ContainsKey(path)) {
+                throw new DirectoryNotFoundException($"Directory not found: {path}");
+            }
+
+            List<string> files = _fileSystem[path];
+
+            if (path == "/")
+            {
+                var firstLevelElements = _fileSystem
+                    .Select(entry => entry.Key.Split('/')[0])
+                    .Distinct();
+
+
+                return firstLevelElements.Concat(files).ToList();
+            }
+
+            var elements = _fileSystem
+                .Where(entry => entry.Key.StartsWith(path) && entry.Key != path)
+                .Select(entry => entry.Key.Substring(path.Length).Split('/')[0])
+                .Distinct();
+
+            return elements.Concat(files).ToList();
         }
 
         public void ChangeDirectory(string path)
         {
             path = NormalizePath(path);
+
+            if (path == "/")
+            {
+                _currentDirectory = "/";
+                return;
+            }
+
             if (_fileSystem.ContainsKey(path))
             {
                 _currentDirectory = path;
@@ -130,6 +164,11 @@ namespace iiweessOS.Models
 
         private string NormalizePath(string path)
         {
+            if (path.StartsWith("~"))
+            {
+                path = _homeDirectory + path.Remove(0, 1);
+            }
+
             if (!path.StartsWith("/"))
             {
                 path = _currentDirectory + path;
@@ -157,7 +196,7 @@ namespace iiweessOS.Models
                 }
             }
 
-            string normalizedPath = "/" + string.Join("/", stack);
+            string normalizedPath = string.Join("/", stack.Reverse());
 
             return normalizedPath.EndsWith("/") ? normalizedPath : normalizedPath + "/";
         }
