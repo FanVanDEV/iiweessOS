@@ -33,7 +33,7 @@ namespace iiweessOS
             {
                 _config = ConfigParser.LoadConfig(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config", "config.yml"));
 
-                _fs = new FileSystemModel(_config.User == "root" ? "root" : $"home/{_config.User}");
+                _fs = new FileSystemModel(_config.User == "root" ? "/root" : $"/home/{_config.User}");
                 _fs.LoadFromTar(_config.Filesystem);
                 _fs.ChangeDirectory("~");
 
@@ -63,11 +63,11 @@ namespace iiweessOS
             string currentDirectory = "/" + _fs.GetCurrentDirectory();
             string path = currentDirectory; 
 
-            if (_config.User == "root" && currentDirectory.StartsWith("root")
+            if (_config.User == "root" && currentDirectory.StartsWith("/root")
                 )
             {
                 path = "~" + currentDirectory
-                    .Substring(4);
+                    .Substring(5);
             } else if (_config.User != "root" && currentDirectory.StartsWith("/home/" + _config.User))
             {
                 int dirLength = $"/home/{_config.User}".Length;
@@ -275,21 +275,24 @@ namespace iiweessOS
         {
             AppendText("\n");
 
-            string result = _shellController.ExecuteCommand(_currentInput);
-            switch (result)
+            if (_currentInput.Length != 0)
             {
-                case "exit":
-                    Application.Exit();
-                    return;
-                case "clear":
-                    SetText("");
-                    break;
-                default:
-                    if (result.Length > 0)
-                        AppendText(result + "\n");
-                    break;
+                string result = _shellController.ExecuteCommand(_currentInput);
+                switch (result)
+                {
+                    case "exit":
+                        Application.Exit();
+                        return;
+                    case "clear":
+                        SetText("");
+                        break;
+                    default:
+                        if (result.Length > 0)
+                            AppendText(result + "\n");
+                        break;
+                }
             }
-              
+
             _currentInput = "";
             UpdatePrompt();
             DisplayPrompt();

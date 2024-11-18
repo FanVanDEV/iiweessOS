@@ -16,7 +16,7 @@ namespace iiweessOS.Models
         private string _currentDirectory = "";
 
         public FileSystemModel(string homeDirectory) {
-            _homeDirectory = NormalizePath(homeDirectory);
+            _homeDirectory = homeDirectory;
         }
 
         public void LoadFromTar(string tarPath)
