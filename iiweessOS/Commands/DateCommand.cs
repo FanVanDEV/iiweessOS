@@ -22,7 +22,7 @@ namespace iiweessOS.Commands
 
         public string GetHelp()
         {
-            return "Usage: date ";
+            return "Usage: date [format]";
         }
     }
 }
