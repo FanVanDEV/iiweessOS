@@ -23,7 +23,10 @@ namespace iiweessOS.Commands
                 this.fs.ChangeDirectory(args[0]);
             } catch (Exception)
             {
-                return $"bash: cd: {args[0]}: No such file or directory";
+                if (args.Length > 1)
+                {
+                    return $"bash: cd: {args[0]}: No such file or directory";
+                }
             }
 
             return string.Empty;
