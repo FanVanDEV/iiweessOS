@@ -69,6 +69,65 @@ namespace iiweessOS.Models
 
         public string GetCurrentDirectory() => _currentDirectory;
 
+        public void Remove(string target, bool recursive = false, bool force = false)
+        {
+            target = NormalizePath(target);
+
+            if (!_fileSystem.ContainsKey(target))
+            {
+                if (force)
+                {
+                    return;
+                }
+
+                throw new FileNotFoundException($"Target not found: {target}");
+            }
+
+            if (_fileSystem[target].Count == 0)
+            {
+                _fileSystem.Remove(target);
+            }
+            else
+            {
+                if (!recursive && _fileSystem[target].Count > 0)
+                {
+                    throw new InvalidOperationException("Directory is not empty. Use recursive flag to delete.");
+                }
+
+                if (recursive)
+                {
+                    DeleteDirectoryRecursive(target);
+                }
+
+                _fileSystem.Remove(target);
+            }
+        }
+
+        private void DeleteDirectoryRecursive(string directory)
+        {
+            if (!_fileSystem.ContainsKey(directory))
+            {
+                return;
+            }
+
+            foreach (string file in _fileSystem[directory])
+            {
+                string filePath = directory + file;
+                _fileSystem.Remove(filePath);
+            }
+
+            var subdirectories = _fileSystem.Keys
+                .Where(key => key.StartsWith(directory) && key != directory)
+                .ToList();
+
+            foreach (string subdirectory in subdirectories)
+            {
+                DeleteDirectoryRecursive(subdirectory);
+            }
+
+            _fileSystem.Remove(directory);
+        }
+
         private string NormalizePath(string path)
         {
             if (!path.StartsWith("/"))
@@ -76,7 +135,31 @@ namespace iiweessOS.Models
                 path = _currentDirectory + path;
             }
 
-            return path.Replace("\\", "/").TrimEnd('/') + "/";
+            string[] parts = path.Replace("\\", "/").Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            Stack<string> stack = new Stack<string>();
+
+            foreach (string part in parts)
+            {
+                if (part == ".")
+                {
+                    continue;
+                }
+                else if (part == "..")
+                {
+                    if (stack.Count > 0)
+                    {
+                        stack.Pop();
+                    }
+                }
+                else
+                {
+                    stack.Push(part);
+                }
+            }
+
+            string normalizedPath = "/" + string.Join("/", stack);
+
+            return normalizedPath.EndsWith("/") ? normalizedPath : normalizedPath + "/";
         }
     }
 }
