@@ -2,6 +2,7 @@
 using iiweessOS.Models;
 using iiweessOS.Utils;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -26,6 +27,9 @@ namespace iiweessOS
         private readonly FileSystemModel _fs = null;
         private readonly Config _config = null;
         private readonly ShellController _shellController = null;
+
+        private List<string> _commandHistory = new List<string>();
+        private int _historyIndex = -1;
 
         public MainForm()
         {       
@@ -53,6 +57,7 @@ namespace iiweessOS
             this.Resize += MainForm_Resize;
             this.SizeChanged += MainForm_SizeChanged;
             terminalTextBox.KeyPress += terminalTextBox_KeyPress;
+            terminalTextBox.KeyDown += terminalTextBox_KeyDown;
 
             UpdatePrompt();
             DisplayPrompt();
@@ -206,6 +211,79 @@ namespace iiweessOS
             terminalTextBox.ScrollToCaret();
         }
 
+        private void RemoveCurrentInput()
+        {
+            if (_currentInput.Length != 0)
+            {
+                terminalTextBox.Text = terminalTextBox.Text.Remove(terminalTextBox.Text.Length - _currentInput.Length - 1);
+                terminalTextBox.SelectionStart = terminalTextBox.Text.Length;
+                terminalTextBox.ScrollToCaret();
+            }
+
+            _currentInput = "";
+        }
+
+        private void HandleArrowKeys(Keys keyData)
+        {
+            if (keyData == Keys.Up)
+            {
+                if (_historyIndex > 0)
+                {
+                    _historyIndex--;
+                    UpdateCommandInput();
+                }
+            }
+            else if (keyData == Keys.Down)
+            {
+                if (_historyIndex == -1)
+                {
+                    return;
+                }
+
+                if (_historyIndex < _commandHistory.Count - 1)
+                {
+                    _historyIndex++;
+                    UpdateCommandInput();
+                }
+                else if (_historyIndex == _commandHistory.Count - 1)
+                {
+                    _historyIndex = -1;
+                    RemoveCurrentInput();
+                }
+            }
+        }
+
+        private void UpdateCommandInput()
+        {
+            if (_historyIndex >= 0 && _historyIndex < _commandHistory.Count)
+            {
+                RemoveCurrentInput();
+                AppendText(_commandHistory[_historyIndex]);
+                _currentInput = _commandHistory[_historyIndex];
+            }
+        }
+
+        private void AddToCommandHistory(string command)
+        {
+            if (!string.IsNullOrWhiteSpace(command))
+            {
+                if (_commandHistory.Count == 0 || _commandHistory[_commandHistory.Count - 1] != command)
+                {
+                    _commandHistory.Add(command);
+                    _historyIndex = _commandHistory.Count; 
+                }
+            }
+        }
+
+        private void terminalTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)
+            {
+                HandleArrowKeys(e.KeyCode);
+                e.Handled = true; 
+            }
+        }
+
         private void terminalTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!char.IsControl(e.KeyChar))
@@ -291,6 +369,8 @@ namespace iiweessOS
                             AppendText(result + "\n");
                         break;
                 }
+
+                AddToCommandHistory(_currentInput);
             }
 
             _currentInput = "";
