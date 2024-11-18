@@ -21,7 +21,8 @@ namespace iiweessOS.Utils
                 { "rm", new RmCommand(fs) },
                 { "date", new DateCommand() },
                 { "cal", new CalCommand() },
-                { "exit", new ExitCommand() }
+                { "clear", new ClearCommand() },
+                { "exit", new ExitCommand() },
             };
         }
 

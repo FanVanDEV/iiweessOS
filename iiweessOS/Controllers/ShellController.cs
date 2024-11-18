@@ -23,7 +23,18 @@ namespace iiweessOS.Controllers
             var args = parts.Length > 1 ? parts.Skip(1).ToArray() : new string[0];
 
             var command = _commandFactory.GetCommand(commandName);
-            return command != null ? command.Execute(args) : "Unknown command";
+
+            if (command != null)
+            {
+                if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h"))
+                {
+                    return command.GetHelp();
+                }
+
+                return command.Execute(args);
+            }
+
+            return $"bash: {commandName}: command not found";
         }
     }
 }

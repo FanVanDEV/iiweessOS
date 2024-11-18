@@ -117,6 +117,7 @@
   <ItemGroup>
     <Compile Include="Commands\CalCommand.cs" />
     <Compile Include="Commands\CdCommand.cs" />
+    <Compile Include="Commands\ClearCommand.cs" />
     <Compile Include="Commands\DateCommand.cs" />
     <Compile Include="Commands\ExitCommand.cs" />
     <Compile Include="Commands\ICommand.cs" />

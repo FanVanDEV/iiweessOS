@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace iiweessOS.Commands
 {
-    public class ExitCommand : ICommand
+    public class ClearCommand : ICommand
     {
         public string Execute(string[] args)
         {
-            return "exit";
+            return "clear";
         }
 
         public string GetHelp()
