@@ -1,4 +1,5 @@
 ﻿using SharpCompress.Archives.Tar;
+using SharpCompress.Common;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,6 +18,38 @@ namespace iiweessOS.Models
 
         public FileSystemModel(string homeDirectory) {
             _homeDirectory = homeDirectory;
+        }
+
+        public void CreateDirectory(string path)
+        {
+            path = NormalizePath(path);
+
+            var directories = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            var currentPath = "";
+
+            foreach (var dir in directories)
+            {
+                currentPath += dir + "/";
+
+                if (!_fileSystem.ContainsKey(currentPath))
+                {
+                    _fileSystem[currentPath] = new List<string>();
+                }
+            }
+        }
+
+        public void SetDirectoryListing(string path, List<string> items)
+        {
+            path = NormalizePath(path);
+
+            // Создаем директорию, если она не существует
+            if (!_fileSystem.ContainsKey(path))
+            {
+                CreateDirectory(path);
+            }
+
+            // Задаем содержимое директории
+            _fileSystem[path] = new List<string>(items);
         }
 
         public void LoadFromTar(string tarPath)

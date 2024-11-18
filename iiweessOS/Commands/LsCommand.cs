@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace iiweessOS.Commands
 {
-    internal class LsCommand : ICommand
+    public class LsCommand : ICommand
     {
         private FileSystemModel fs;
 
