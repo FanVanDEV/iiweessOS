@@ -20,7 +20,7 @@ namespace iiweessOS.Commands
         {
             try
             {
-                this.fs.ChangeDirectory(args[0]);
+                this.fs.ChangeDirectory(args.Length > 0 ? args[0] : string.Empty);
             } catch (Exception)
             {
                 if (args.Length > 0)

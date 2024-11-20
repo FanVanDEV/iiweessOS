@@ -14,7 +14,8 @@ namespace iiweessOS.Models
     {
         private readonly Dictionary<string, List<string>> _fileSystem = new Dictionary<string, List<string>>();
         private readonly string _homeDirectory;
-        private string _currentDirectory = "";
+        private string _lastDirectory;
+        private string _currentDirectory = "/";
 
         public FileSystemModel(string homeDirectory) {
             _homeDirectory = homeDirectory;
@@ -42,13 +43,11 @@ namespace iiweessOS.Models
         {
             path = NormalizePath(path);
 
-            // Создаем директорию, если она не существует
             if (!_fileSystem.ContainsKey(path))
             {
                 CreateDirectory(path);
             }
 
-            // Задаем содержимое директории
             _fileSystem[path] = new List<string>(items);
         }
 
@@ -116,7 +115,18 @@ namespace iiweessOS.Models
 
         public void ChangeDirectory(string path)
         {
+            string currentDirectory = GetCurrentDirectory();
+
+            if (path == "-")
+            {
+                _currentDirectory = _lastDirectory;
+                _lastDirectory = currentDirectory;
+                return;
+            }
+
             path = NormalizePath(path);
+
+            _lastDirectory = currentDirectory;
 
             if (path == "/")
             {
@@ -203,6 +213,11 @@ namespace iiweessOS.Models
 
         private string NormalizePath(string path)
         {
+            if (path.Length == 0 || path == "" || path == string.Empty)
+            {
+                path = "~";
+            }
+
             if (path.StartsWith("~"))
             {
                 path = _homeDirectory + path.Remove(0, 1);
