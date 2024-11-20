@@ -23,6 +23,7 @@ namespace iiweessOS
 
         private string _prompt;
         private string _currentInput = "";
+        private string _lastInput = "";
 
         private readonly FileSystemModel _fs = null;
         private readonly Config _config = null;
@@ -215,7 +216,7 @@ namespace iiweessOS
         {
             if (_currentInput.Length != 0)
             {
-                terminalTextBox.Text = terminalTextBox.Text.Remove(terminalTextBox.Text.Length - _currentInput.Length - 1);
+                terminalTextBox.Text = terminalTextBox.Text.Remove(terminalTextBox.Text.Length - _currentInput.Length);
                 terminalTextBox.SelectionStart = terminalTextBox.Text.Length;
                 terminalTextBox.ScrollToCaret();
             }
@@ -227,6 +228,11 @@ namespace iiweessOS
         {
             if (keyData == Keys.Up)
             {
+                if (_historyIndex == _commandHistory.Count)
+                {
+                    _lastInput = _currentInput;
+                }
+
                 if (_historyIndex > 0)
                 {
                     _historyIndex--;
@@ -235,11 +241,6 @@ namespace iiweessOS
             }
             else if (keyData == Keys.Down)
             {
-                if (_historyIndex == -1)
-                {
-                    return;
-                }
-
                 if (_historyIndex < _commandHistory.Count - 1)
                 {
                     _historyIndex++;
@@ -247,8 +248,11 @@ namespace iiweessOS
                 }
                 else if (_historyIndex == _commandHistory.Count - 1)
                 {
-                    _historyIndex = -1;
+                    _historyIndex++;
+
                     RemoveCurrentInput();
+                    AppendText(_lastInput);
+                    _currentInput = _lastInput;
                 }
             }
         }
@@ -270,9 +274,10 @@ namespace iiweessOS
                 if (_commandHistory.Count == 0 || _commandHistory[_commandHistory.Count - 1] != command)
                 {
                     _commandHistory.Add(command);
-                    _historyIndex = _commandHistory.Count; 
                 }
             }
+
+            _historyIndex = _commandHistory.Count;
         }
 
         private void terminalTextBox_KeyDown(object sender, KeyEventArgs e)
@@ -374,6 +379,7 @@ namespace iiweessOS
             }
 
             _currentInput = "";
+            _lastInput = _currentInput;
             UpdatePrompt();
             DisplayPrompt();
         }
